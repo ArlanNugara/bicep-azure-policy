@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = dp4_automation_account_variables_should_be_encrypted_policy.id
-
 resource dp4_automation_account_variables_should_be_encrypted_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Automation account variables should be encrypted'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Automation account variables should be encrypted'
     policyType: 'Custom'
     mode: 'All'
     description: 'It is important to enable encryption of Automation account variable assets when storing sensitive data'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.1.0'
+      category: 'Automation'
     }
     policyRule: {
       if: {

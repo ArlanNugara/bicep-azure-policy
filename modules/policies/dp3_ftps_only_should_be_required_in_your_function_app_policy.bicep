@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = dp3_ftps_only_should_be_required_in_your_function_app_policy.id
-
 resource dp3_ftps_only_should_be_required_in_your_function_app_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-FTPS only should be required in your Function App'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-FTPS only should be required in your Function App'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Enable FTPS enforcement for enhanced security'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '2.0.0'
+      category: 'App Service'
     }
     policyRule: {
       if: {

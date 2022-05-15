@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns1_all_network_ports_should_be_restricted_on_network_security_groups_associated_to_your_virtual_machine_policy.id
-
 resource ns1_all_network_ports_should_be_restricted_on_network_security_groups_associated_to_your_virtual_machine_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-All network ports should be restricted on network security groups associated to your virtual machine'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-All network ports should be restricted on network security groups associated to your virtual machine'
     policyType: 'Custom'
     mode: 'All'
-    description: 'Azure Security Center has identified some of your network security groups inbound rules to be too permissive. Inbound rules should not allow access from Any or Internet ranges. This can potentially enable attackers to target your resources.'
+    description: 'Azure Security Center has identified some of your network security groups\' inbound rules to be too permissive. Inbound rules should not allow access from \'Any\' or \'Internet\' ranges. This can potentially enable attackers to target your resources.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

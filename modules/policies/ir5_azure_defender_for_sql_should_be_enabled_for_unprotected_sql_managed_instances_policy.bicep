@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ir5_azure_defender_for_sql_should_be_enabled_for_unprotected_sql_managed_instances_policy.id
-
 resource ir5_azure_defender_for_sql_should_be_enabled_for_unprotected_sql_managed_instances_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Azure Defender for SQL should be enabled for unprotected SQL Managed Instances'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Azure Defender for SQL should be enabled for unprotected SQL Managed Instances'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Audit each SQL Managed Instance without advanced data security.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.2'
+      category: 'SQL'
     }
     policyRule: {
       if: {

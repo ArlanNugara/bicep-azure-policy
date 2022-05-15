@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ir2_email_notification_to_subscription_owner_for_high_severity_alerts_should_be_enabled_policy.id
-
 resource ir2_email_notification_to_subscription_owner_for_high_severity_alerts_should_be_enabled_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Email notification to subscription owner for high severity alerts should be enabled'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Email notification to subscription owner for high severity alerts should be enabled'
     policyType: 'Custom'
     mode: 'All'
     description: 'To ensure your subscription owners are notified when there is a potential security breach in their subscription, set email notifications to subscription owners for high severity alerts in Security Center.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '2.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

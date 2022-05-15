@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
-output policyId string = br2_azure_backup_for_vm_policy.id
-
-resource br2_azure_backup_for_vm_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+output policyId string = br2_azure_backup_should_be_enabled_for_virtual_machines_policy.id
+resource br2_azure_backup_should_be_enabled_for_virtual_machines_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
+  name: '${client}-Azure Backup should be enabled for Virtual Machines'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Azure Backup should be enabled for Virtual Machines'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Ensure protection of your Azure Virtual Machines by enabling Azure Backup. Azure Backup is a secure and cost effective data protection solution for Azure.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Backup'
     }
     policyRule: {
       if: {

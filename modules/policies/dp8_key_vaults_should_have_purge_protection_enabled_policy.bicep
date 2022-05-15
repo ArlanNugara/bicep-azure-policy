@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = dp8_key_vaults_should_have_purge_protection_enabled_policy.id
-
 resource dp8_key_vaults_should_have_purge_protection_enabled_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Key vaults should have purge protection enabled'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Key vaults should have purge protection enabled'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Malicious deletion of a key vault can lead to permanent data loss. A malicious insider in your organization can potentially delete and purge key vaults. Purge protection protects you from insider attacks by enforcing a mandatory retention period for soft deleted key vaults. No one inside your organization or Microsoft will be able to purge your key vaults during the soft delete retention period.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '2.0.0'
+      category: 'Key Vault'
     }
     policyRule: {
       if: {

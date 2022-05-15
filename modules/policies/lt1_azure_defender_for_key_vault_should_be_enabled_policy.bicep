@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = lt1_azure_defender_for_key_vault_should_be_enabled_policy.id
-
 resource lt1_azure_defender_for_key_vault_should_be_enabled_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Azure Defender for Key Vault should be enabled'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Azure Defender for Key Vault should be enabled'
     policyType: 'Custom'
     mode: 'All'
     description: 'Azure Defender for Key Vault provides an additional layer of protection and security intelligence by detecting unusual and potentially harmful attempts to access or exploit key vault accounts.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.3'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

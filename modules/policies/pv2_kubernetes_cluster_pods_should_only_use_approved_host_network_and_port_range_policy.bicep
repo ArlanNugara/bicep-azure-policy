@@ -1,16 +1,16 @@
 targetScope = 'subscription'
 
 param client string
-output policyId string = pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy.id
-resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-Kubernetes clusters should not use the default namespace'
+output policyId string = pv2_kubernetes_cluster_pods_should_only_use_approved_host_network_and_port_range_policy.id
+resource pv2_kubernetes_cluster_pods_should_only_use_approved_host_network_and_port_range_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
+  name: '${client}-Kubernetes cluster pods should only use approved host network and port range'
   properties: {
-    displayName: '${client}-Kubernetes clusters should not use the default namespace'
+    displayName: '${client}-Kubernetes cluster pods should only use approved host network and port range'
     policyType: 'Custom'
     mode: 'Microsoft.Kubernetes.Data'
-    description: 'Prevent usage of the default namespace in Kubernetes clusters to protect against unauthorized access for ConfigMap, Pod, Secret, Service, and ServiceAccount resource types. For more information, see https://aka.ms/kubepolicydoc.'
+    description: 'Restrict pod access to the host network and the allowable host port range in a Kubernetes cluster. This recommendation is part of CIS 5.2.4 which is intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.'
     metadata: {
-      version: '2.2.0'
+      version: '4.1.0'
       category: 'Kubernetes'
     }
     parameters: {
@@ -32,9 +32,7 @@ resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Mi
           displayName: 'Namespace inclusions'
           description: 'List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces.'
         }
-        defaultValue: [
-          'default'
-        ]
+        defaultValue: []
       }
       labelSelector: {
         type: 'Object'
@@ -95,6 +93,38 @@ resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Mi
           additionalProperties: false
         }
       }
+      allowHostNetwork: {
+        type: 'Boolean'
+        metadata: {
+          displayName: 'Allow host network usage'
+          description: 'Set this value to true if pod is allowed to use host network otherwise false.'
+        }
+        defaultValue: false
+      }
+      minPort: {
+        type: 'Integer'
+        metadata: {
+          displayName: 'Min host port'
+          description: 'The minimum value in the allowable host port range that pods can use in the host network namespace.'
+        }
+        defaultValue: 0
+      }
+      maxPort: {
+        type: 'Integer'
+        metadata: {
+          displayName: 'Max host port'
+          description: 'The maximum value in the allowable host port range that pods can use in the host network namespace.'
+        }
+        defaultValue: 0
+      }
+      excludedContainers: {
+        type: 'Array'
+        metadata: {
+          displayName: 'Containers exclusions'
+          description: 'The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces.'
+        }
+        defaultValue: []
+      }
     }
     policyRule: {
       if: {
@@ -108,11 +138,17 @@ resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Mi
       then: {
         effect: 'Audit'
         details: {
-          constraintTemplate: 'https://store.policy.core.windows.net/kubernetes/block-default-namespace/v1/template.yaml'
-          constraint: 'https://store.policy.core.windows.net/kubernetes/block-default-namespace/v1/constraint.yaml'
+          constraintTemplate: 'https://store.policy.core.windows.net/kubernetes/host-network-ports/v2/template.yaml'
+          constraint: 'https://store.policy.core.windows.net/kubernetes/host-network-ports/v2/constraint.yaml'
           excludedNamespaces: '[parameters(\'excludedNamespaces\')]'
           namespaces: '[parameters(\'namespaces\')]'
           labelSelector: '[parameters(\'labelSelector\')]'
+          values: {
+            allowHostNetwork: '[parameters(\'allowHostNetwork\')]'
+            minPort: '[parameters(\'minPort\')]'
+            maxPort: '[parameters(\'maxPort\')]'
+            excludedContainers: '[parameters(\'excludedContainers\')]'
+          }
         }
       }
     }

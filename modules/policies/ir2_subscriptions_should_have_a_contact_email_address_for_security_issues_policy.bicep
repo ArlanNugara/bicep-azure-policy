@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ir2_subscriptions_should_have_a_contact_email_address_for_security_issues_policy.id
-
 resource ir2_subscriptions_should_have_a_contact_email_address_for_security_issues_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Subscriptions should have a contact email address for security issues'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Subscriptions should have a contact email address for security issues'
     policyType: 'Custom'
     mode: 'All'
     description: 'To ensure the relevant people in your organization are notified when there is a potential security breach in one of your subscriptions, set a security contact to receive email notifications from Security Center.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.1'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

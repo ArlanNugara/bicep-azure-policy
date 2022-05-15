@@ -1,16 +1,16 @@
 targetScope = 'subscription'
 
 param client string
-output policyId string = pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy.id
-resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-Kubernetes clusters should not use the default namespace'
+output policyId string = pv2_kubernetes_cluster_pod_hostpath_volumes_should_only_use_allowed_host_paths_policy.id
+resource pv2_kubernetes_cluster_pod_hostpath_volumes_should_only_use_allowed_host_paths_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
+  name: '${client}-Kubernetes cluster pod hostPath volumes should only use allowed host paths'
   properties: {
-    displayName: '${client}-Kubernetes clusters should not use the default namespace'
+    displayName: '${client}-Kubernetes cluster pod hostPath volumes should only use allowed host paths'
     policyType: 'Custom'
     mode: 'Microsoft.Kubernetes.Data'
-    description: 'Prevent usage of the default namespace in Kubernetes clusters to protect against unauthorized access for ConfigMap, Pod, Secret, Service, and ServiceAccount resource types. For more information, see https://aka.ms/kubepolicydoc.'
+    description: 'Limit pod HostPath volume mounts to the allowed host paths in a Kubernetes Cluster. This recommendation is part of Pod Security Policies which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.'
     metadata: {
-      version: '2.2.0'
+      version: '4.1.0'
       category: 'Kubernetes'
     }
     parameters: {
@@ -32,9 +32,7 @@ resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Mi
           displayName: 'Namespace inclusions'
           description: 'List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces.'
         }
-        defaultValue: [
-          'default'
-        ]
+        defaultValue: []
       }
       labelSelector: {
         type: 'Object'
@@ -95,6 +93,52 @@ resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Mi
           additionalProperties: false
         }
       }
+      allowedHostPaths: {
+        type: 'Object'
+        metadata: {
+          displayName: 'Allowed host paths'
+          description: 'The host paths allowed for pod hostPath volumes to use. Provide an empty paths list to block all host paths.'
+        }
+        defaultValue: {
+          paths: []
+        }
+        schema: {
+          type: 'object'
+          properties: {
+            paths: {
+              type: 'array'
+              items: {
+                type: 'object'
+                properties: {
+                  pathPrefix: {
+                    type: 'string'
+                  }
+                  readOnly: {
+                    type: 'boolean'
+                  }
+                }
+                required: [
+                  'pathPrefix'
+                  'readOnly'
+                ]
+                additionalProperties: false
+              }
+            }
+          }
+          required: [
+            'paths'
+          ]
+          additionalProperties: false
+        }
+      }
+      excludedContainers: {
+        type: 'Array'
+        metadata: {
+          displayName: 'Containers exclusions'
+          description: 'The list of InitContainers and Containers to exclude from readonly evaluation. It will not exclude the disallowed host path. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces.'
+        }
+        defaultValue: []
+      }
     }
     policyRule: {
       if: {
@@ -108,11 +152,15 @@ resource pv2_kubernetes_clusters_should_not_use_the_default_namespace_policy 'Mi
       then: {
         effect: 'Audit'
         details: {
-          constraintTemplate: 'https://store.policy.core.windows.net/kubernetes/block-default-namespace/v1/template.yaml'
-          constraint: 'https://store.policy.core.windows.net/kubernetes/block-default-namespace/v1/constraint.yaml'
+          constraintTemplate: 'https://store.policy.core.windows.net/kubernetes/allowed-host-paths/v2/template.yaml'
+          constraint: 'https://store.policy.core.windows.net/kubernetes/allowed-host-paths/v2/constraint.yaml'
           excludedNamespaces: '[parameters(\'excludedNamespaces\')]'
           namespaces: '[parameters(\'namespaces\')]'
           labelSelector: '[parameters(\'labelSelector\')]'
+          values: {
+            allowedHostPaths: '[parameters(\'allowedHostPaths\').paths]'
+            excludedContainers: '[parameters(\'excludedContainers\')]'
+          }
         }
       }
     }

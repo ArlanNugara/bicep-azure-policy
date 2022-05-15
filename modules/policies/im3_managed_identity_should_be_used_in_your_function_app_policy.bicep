@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = im3_managed_identity_should_be_used_in_your_function_app_policy.id
-
 resource im3_managed_identity_should_be_used_in_your_function_app_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Managed identity should be used in your Function App'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Managed identity should be used in your Function App'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Use a managed identity for enhanced authentication security'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '2.0.0'
+      category: 'App Service'
     }
     policyRule: {
       if: {

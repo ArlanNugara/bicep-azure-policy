@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns1_subnets_should_be_associated_with_a_network_security_group_policy.id
-
 resource ns1_subnets_should_be_associated_with_a_network_security_group_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Subnets should be associated with a Network Security Group'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Subnets should be associated with a Network Security Group'
     policyType: 'Custom'
     mode: 'All'
     description: 'Protect your subnet from potential threats by restricting access to it with a Network Security Group (NSG). NSGs contain a list of Access Control List (ACL) rules that allow or deny network traffic to your subnet.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

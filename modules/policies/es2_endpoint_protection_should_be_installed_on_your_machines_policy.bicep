@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = es2_endpoint_protection_should_be_installed_on_your_machines_policy.id
-
 resource es2_endpoint_protection_should_be_installed_on_your_machines_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Endpoint protection should be installed on your machines'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Endpoint protection should be installed on your machines'
     policyType: 'Custom'
     mode: 'All'
     description: 'To protect your machines from threats and vulnerabilities, install a supported endpoint protection solution.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

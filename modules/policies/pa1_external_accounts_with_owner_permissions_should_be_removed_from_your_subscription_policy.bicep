@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = pa1_external_accounts_with_owner_permissions_should_be_removed_from_your_subscription_policy.id
-
 resource pa1_external_accounts_with_owner_permissions_should_be_removed_from_your_subscription_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-External accounts with owner permissions should be removed from your subscription'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-External accounts with owner permissions should be removed from your subscription'
     policyType: 'Custom'
     mode: 'All'
     description: 'External accounts with owner permissions should be removed from your subscription in order to prevent unmonitored access.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns3_management_ports_should_be_closed_on_your_virtual_machines_policy.id
-
 resource ns3_management_ports_should_be_closed_on_your_virtual_machines_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Management ports should be closed on your virtual machines'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Management ports should be closed on your virtual machines'
     policyType: 'Custom'
     mode: 'All'
     description: 'Open remote management ports are exposing your VM to a high level of risk from Internet-based attacks. These attacks attempt to brute force credentials to gain admin access to the machine.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

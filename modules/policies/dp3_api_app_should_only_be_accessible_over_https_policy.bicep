@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = dp3_api_app_should_only_be_accessible_over_https_policy.id
-
 resource dp3_api_app_should_only_be_accessible_over_https_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-API App should only be accessible over HTTPS'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-API App should only be accessible over HTTPS'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Use of HTTPS ensures server/service authentication and protects data in transit from network layer eavesdropping attacks.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.0'
+      category: 'App Service'
     }
     policyRule: {
       if: {

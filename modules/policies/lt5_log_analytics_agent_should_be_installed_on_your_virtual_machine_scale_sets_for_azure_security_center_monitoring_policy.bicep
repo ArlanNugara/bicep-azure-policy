@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = lt5_log_analytics_agent_should_be_installed_on_your_virtual_machine_scale_sets_for_azure_security_center_monitoring_policy.id
-
 resource lt5_log_analytics_agent_should_be_installed_on_your_virtual_machine_scale_sets_for_azure_security_center_monitoring_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Log Analytics agent should be installed on your virtual machine scale sets for Azure Security Center monitoring'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Log Analytics agent should be installed on your virtual machine scale sets for Azure Security Center monitoring'
     policyType: 'Custom'
     mode: 'All'
     description: 'Security Center collects data from your Azure virtual machines (VMs) to monitor for security vulnerabilities and threats.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

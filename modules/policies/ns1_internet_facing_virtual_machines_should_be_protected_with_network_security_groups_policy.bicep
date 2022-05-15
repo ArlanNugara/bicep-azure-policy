@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns1_internet_facing_virtual_machines_should_be_protected_with_network_security_groups_policy.id
-
 resource ns1_internet_facing_virtual_machines_should_be_protected_with_network_security_groups_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Internet-facing virtual machines should be protected with network security groups'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Internet-facing virtual machines should be protected with network security groups'
     policyType: 'Custom'
     mode: 'All'
     description: 'Protect your virtual machines from potential threats by restricting access to them with network security groups (NSG). Learn more about controlling traffic with NSGs at https://aka.ms/nsg-doc'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

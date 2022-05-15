@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns2_storage_accounts_should_use_private_link_policy.id
-
 resource ns2_storage_accounts_should_use_private_link_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Storage accounts should use private link'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Storage accounts should use private link'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your storage account, data leakage risks are reduced. Learn more about private links at - https://aka.ms/azureprivatelinkoverview'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '2.0.0'
+      category: 'Storage'
     }
     policyRule: {
       if: {

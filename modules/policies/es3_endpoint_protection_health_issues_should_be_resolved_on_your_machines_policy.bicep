@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = es3_endpoint_protection_health_issues_should_be_resolved_on_your_machines_policy.id
-
 resource es3_endpoint_protection_health_issues_should_be_resolved_on_your_machines_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Endpoint protection health issues should be resolved on your machines'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Endpoint protection health issues should be resolved on your machines'
     policyType: 'Custom'
     mode: 'All'
     description: 'Resolve endpoint protection health issues on your virtual machines to protect them from latest threats and vulnerabilities. Azure Security Center supported endpoint protection solutions are documented here - https://docs.microsoft.com/azure/security-center/security-center-services?tabs=features-windows#supported-endpoint-protection-solutions. Endpoint protection assessment is documented here - https://docs.microsoft.com/azure/security-center/security-center-endpoint-protection.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

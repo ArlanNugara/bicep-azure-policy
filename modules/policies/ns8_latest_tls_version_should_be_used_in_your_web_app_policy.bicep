@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns8_latest_tls_version_should_be_used_in_your_web_app_policy.id
-
 resource ns8_latest_tls_version_should_be_used_in_your_web_app_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Latest TLS version should be used in your Web App'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Latest TLS version should be used in your Web App'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Upgrade to the latest TLS version'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '1.0.0'
+      category: 'App Service'
     }
     policyRule: {
       if: {

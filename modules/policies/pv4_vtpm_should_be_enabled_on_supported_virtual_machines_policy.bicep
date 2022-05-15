@@ -1,28 +1,18 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = pv4_vtpm_should_be_enabled_on_supported_virtual_machines_policy.id
-
 resource pv4_vtpm_should_be_enabled_on_supported_virtual_machines_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-vTPM should be enabled on supported virtual machines'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-vTPM should be enabled on supported virtual machines'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Enable virtual TPM device on supported virtual machines to facilitate Measured Boot and other OS security features that require a TPM. Once enabled, vTPM can be used to attest boot integrity. This assessment only applies to trusted launch enabled virtual machines.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      category: 'Security Center'
+      version: '2.0.0-preview'
+      preview: true
     }
     policyRule: {
       if: {

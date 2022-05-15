@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = im6_mfa_should_be_enabled_on_accounts_with_owner_permissions_on_your_subscription_policy.id
-
 resource im6_mfa_should_be_enabled_on_accounts_with_owner_permissions_on_your_subscription_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-MFA should be enabled on accounts with owner permissions on your subscription'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-MFA should be enabled on accounts with owner permissions on your subscription'
     policyType: 'Custom'
     mode: 'All'
     description: 'Multi-Factor Authentication (MFA) should be enabled for all subscription accounts with owner permissions to prevent a breach of accounts or resources.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

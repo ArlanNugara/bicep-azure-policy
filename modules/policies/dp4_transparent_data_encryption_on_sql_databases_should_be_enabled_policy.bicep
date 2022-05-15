@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = dp4_transparent_data_encryption_on_sql_databases_should_be_enabled_policy.id
-
 resource dp4_transparent_data_encryption_on_sql_databases_should_be_enabled_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Transparent Data Encryption on SQL databases should be enabled'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Transparent Data Encryption on SQL databases should be enabled'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Transparent data encryption should be enabled to protect data-at-rest and meet compliance requirements'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '2.0.0'
+      category: 'SQL'
     }
     policyRule: {
       if: {

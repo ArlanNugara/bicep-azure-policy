@@ -1,28 +1,18 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns2_storage_account_public_access_should_be_disallowed_policy.id
-
 resource ns2_storage_account_public_access_should_be_disallowed_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Storage account public access should be disallowed'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Storage account public access should be disallowed'
     policyType: 'Custom'
-    mode: 'All'
+    mode: 'Indexed'
     description: 'Anonymous public read access to containers and blobs in Azure Storage is a convenient way to share data but might present security risks. To prevent data breaches caused by undesired anonymous access, Microsoft recommends preventing public access to a storage account unless your scenario requires it.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.1.0-preview'
+      category: 'Storage'
+      preview: true
     }
     policyRule: {
       if: {

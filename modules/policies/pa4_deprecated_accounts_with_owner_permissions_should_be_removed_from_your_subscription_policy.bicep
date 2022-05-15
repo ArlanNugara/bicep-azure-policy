@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = pa4_deprecated_accounts_with_owner_permissions_should_be_removed_from_your_subscription_policy.id
-
 resource pa4_deprecated_accounts_with_owner_permissions_should_be_removed_from_your_subscription_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Deprecated accounts with owner permissions should be removed from your subscription'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Deprecated accounts with owner permissions should be removed from your subscription'
     policyType: 'Custom'
     mode: 'All'
     description: 'Deprecated accounts with owner permissions should be removed from your subscription.  Deprecated accounts are accounts that have been blocked from signing in.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {

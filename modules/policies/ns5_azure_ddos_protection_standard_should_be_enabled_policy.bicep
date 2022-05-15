@@ -1,28 +1,17 @@
 targetScope = 'subscription'
 
-param policyInputData object
 param client string
 output policyId string = ns5_azure_ddos_protection_standard_should_be_enabled_policy.id
-
 resource ns5_azure_ddos_protection_standard_should_be_enabled_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-'
+  name: '${client}-Azure DDoS Protection Standard should be enabled'
   properties: {
-    displayName: '${client}-'
+    displayName: '${client}-Azure DDoS Protection Standard should be enabled'
     policyType: 'Custom'
     mode: 'All'
     description: 'DDoS protection standard should be enabled for all virtual networks with a subnet that is part of an application gateway with a public IP.'
     metadata: {
-      category: 'Networking'
-    }
-    parameters: {
-      nsgInboundRuleAllowedNames: {
-        type: 'String'
-        metadata: {
-          description: 'Audit NSG Inbound Rules'
-          displayName: 'Enable or disable the execution of the policy'
-        }
-        defaultValue: policyInputData.effect
-      }
+      version: '3.0.0'
+      category: 'Security Center'
     }
     policyRule: {
       if: {
