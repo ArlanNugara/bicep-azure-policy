@@ -61,201 +61,125 @@ An initiative definition is a collection of policy definitions that are tailored
 
 An assignment is a policy definition or initiative that has been assigned to a specific scope. This scope could range from a management group to an individual resource. The term scope refers to all the resources, resource groups, subscriptions, or management groups that the definition is assigned to. Assignments are inherited by all child resources. This design means that a definition applied to a resource group is also applied to resources in that resource group. However, you can exclude a subscope from the assignment.
 
+# Resources Deployed
+
+This project mainly focussed on deploying Azure Virtual Machine Extensions, Built-In and Custom Policy using Bicep including Management Groups and Subscription Placement. The Policy deploys the Extensions in both Windows and Linux systems. Remediation Tasks only works for **DeployIfNotExists** Policy. Existing systems does not automatically remediate, but is remediated using  Policy Remediation Task. Any new system will automatically have the Extensions installed after deployment. 
+
+Here's the list of VM Extensions being deployed using this IaC code.
+
+- **VM Insights with Azure Monitoring Agent and Data Collection Rule**
+- **VM Dependency Agent**
+- **VM Microsoft Defender for Endpoint**
+- **VM Insights with Azure Monitoring Agent and Data Collection Rule for Azure ARC VM**
+- **VM Insights with Azure Monitoring Agent and Data Collection Rule for Azure VM**
+- **VM Guest Config**
+- **VM Iaas Antimalware**
+
+Here's the List of all other Policy that are deployed.
+
+- **Azure Security Benchmark**  
+- **CIS Microsoft Azure Foundations Benchmark**  
+- **Compute Governance**  
+- **Deploy Diagnostics Settings for Storage Accounts to Log Analytics Workspace**  
+- **Deploy Diagnostics Settings for Supported Resources to Log Analytics Workspace**  
+- **Deploy Service Health Alert Policy**  
+- **General Governance**  
+- **MySQL Governance**  
+- **Network Governance**  
+- **NIST SP 800-53 R5**  
+- **Tags Governance**  
+- **PostgreSQL Governance**  
+- **SQL Governance**  
+- **Storage Governance**  
+
+Here are the currently supported OS versions for VM extensions : -
+
+|Publisher  | SKU | Status |
+|:--| :--: | :--: |
+|Ubuntu | 16.04 | Supported |
+|Ubuntu | 18.04 | Supported |
+|Ubuntu | 20.04 | Supported |
+|Ubuntu | 22.04 | Supported |
+|Ubuntu | 24.04 | Not Supported Yet |
+|RHEL | 7*  | Supported |
+|RHEL | 8*  | **Partially Supported** |
+|RHEL | 9*  | Not Supported Yet |
+|Windows  | 2016  | Supported |
+|Windows  | 2019  | Supported |
+|Windows  | 2022  | Supported |
+|Windows  | 10  | Supported |
+
+
+# Prerequisites
+
+## Service Connection
+
+Azure DevOps Pipeline requires Service Connection to run tasks. Please refer to this [official article](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#create-a-service-connection) for creating the Service Connection from a Service Principle. Note the following values for a Service Principle from Azure Portal.
+
+|Key Name|Value|
+|:--|:--|
+|ARM-CLIENT-ID|Application ID of the Service Principle|
+|ARM-CLIENT-SECRET|Client Secret of the Service Principle|
+|ARM-SUBSCRIPTION-ID|Subscription ID of the Key Vault|
+|ARM-TENANT-ID|Azure Tenant ID|
+
 # Going through the Bicep code
 
-The Bicep project is configured to work on the following principle
+The code is simplified to granular level for ease of maintenance and understanding. You may change values as per your convenience.
 
-- The **main.bicep** calls the **policy.bicep** file.
-- The **policy.bicep** in returns calls the modules in **modules/policies** directory and creates the policies.
-- The **main.parameters.json** file is passed to the command which contains all the key value pair of the variables. You need to exchange **"<Your Value Here>"** with your values.
+|Name|Function|
+|:--|:--|
+|.pipelines| Contains Azure DevOps Pipeline YAMLs|
+|azresources| Contains Modules for Resources|
+|config| Contains Bicepparam files|
+|deployment| Contains Bicep files|
+|commonParameters.json| Contains Global Variables|
 
-## Understanding Policy code
+## Update values in bicepparam file
 
-The **main.bicep** file starts with a **targetScope** variable which defines the deployment scope of the code.
+You might need to update the values in **config/** files. Update the values as per your organization's requirement.
 
-```
-targetScope = 'subscription'
-```
+## Updating Pipeline YAML file with values
 
-Then it defines the parameters and their type
-
-```
-param policyInitiativeArray array
-```
-
-The code is defined to run in loops for the modules defined in **policy.bicep**.
+Once done with all the [above steps](#prerequisites) update the **cd-template.yaml** file inside **.pipelines** folder in the repository and update the **cd.yaml** file with your Azure DevOps repository details
 
 ```
-module policyM 'modules/policy.bicep' = [for (pol, i) in policyInitiativeArray: {
-  name: 'Policy-${i}'
-  params: {
-    policyData: pol
-  }
-}]
+parameters:
+  serviceConnection: '<Your Service Connection Name Here>'
 ```
 
-The **policy.bicep** files call the modules. Here's example of calling the module **allowed_regions**
-
 ```
-module allowedRegionsModule './policies/allowed_regions.bicep' = {
-  name: '${policyData.client}-${policyData.allowed_regions_policy.name}'
-  params: {
-    client: policyData.client
-    policyInputData: policyData.allowed_regions_policy
-  }
-}
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: <Your Azure DevOps Project Name Here>/<Your Azure DevOps Repository Name Here>
 ```
-
-Now let's check the policy which allows certain regions for resources. Let's do a step by step breakdown of the code. Taking example of **allow_regions.bicep** policy which is called in previous step
-
-The initial settings. You can see we are doing a output for the policy ID which will be used while creating the Policy Set Definition
-
-```
-targetScope = 'subscription'
-
-param policyInputData object
-param client string
-output policyId string = allowed_regions_policy.id
-```
-
-The general details of the policy. All values comes from **main.parameter.json** file
-
-```
-resource allowed_regions_policy 'Microsoft.Authorization/policyDefinitions@2021-06-01' = {
-  name: '${client}-${policyInputData.name}'
-  properties: {
-    displayName: '${client}-${policyInputData.displayName}'
-    policyType: 'Custom'
-    mode: 'All'
-    description: policyInputData.description
-    metadata: {
-      category: 'General'
-    }
-```
-
-The policy rule is defined here. It uses the parameter for **regAllowedRegions** and a variable **policyInputData.effect**
-
-```
-policyRule: {
-    if: {
-      allOf: [
-        {
-          field: 'location'
-          notIn: '[parameters(\'regAllowedRegions\')]'
-        }
-        {
-          field: 'location'
-          notEquals: 'global'
-        }
-        {
-          field: 'type'
-          notEquals: 'Microsoft.AzureActiveDirectory/b2cDirectories'
-        }
-      ]
-    }
-    then: {
-      effect: policyInputData.effect
-    }
-}
-```
-
-Now lets go back to **policy.bicep** and attach the policies to a Policy Set Definition. The initial properties have been set. Note the **dependsOn** section
-
-```
-resource policyDefSet 'Microsoft.Authorization/policySetDefinitions@2021-06-01' = {
-  name: '${policyData.client}-${policyData.name}'
-  dependsOn: [
-    allowedRegionsModule
-    ........truncated..........
-  ]
-  properties: {
-    policyType: policyData.policyType
-    displayName: policyData.policySetDefinitionDisplayName
-    parameters: {}
-    .........trancated........
-```
-
-Attaching the policy to a Policy Set Definition. Note the **parameters** are empty as it is already set in the policies.
-
-```
-.....trauncated......
-policyDefinitions: [
-    {
-    //#3:allowed_regions_policy
-    policyDefinitionId: allowedRegionsModule.outputs.policyId
-    parameters: {}
-    }
-```
-
-Now the last part of the Assignments of the policies. Note that the Policy Set Definiton is used and not individual Policy Definitions.
-
-```
-resource policyAssign 'Microsoft.Authorization/policyAssignments@2021-06-01' = {
-  name: '${policyData.client}-${policyData.name}-Assignment'
-  properties: {
-    displayName: '${policyData.client}-${policyData.policyInitiativeDisplayName}'
-    enforcementMode: 'Default'
-    policyDefinitionId: policyDefSet.id
-    parameters: {}
-  }
-}
-```
-
-The parameter file is a simple json file which holds value of all the variables.
-
-```
-.......truncated........
-"allowed_regions_policy": {
-    "name": "Allowed-Azure-Regions",
-    "displayName": "Allowed Azure Regions",
-    "description": "This policy allows resources to be created in the allowed locations.",
-    "listOfAllowedLocations": ["canadaeast", "canadacentral"],
-    "effect": "Audit"
-    },
-........truncated.......
-```
-
-# Policies that are created
-
-1. Allowed Regions
-2. Allowed Resource Types
-3. Allowed SQL Version
-4. Allowed Storage Account SKU
-5. Allowed VM Extensions
-6. Allowed Subnets for Public IP
-7. Allowed VM OS and version
-8. Allowed VM SKU
-9. DDOS Protection
-10. Diagnostics Settings
-11. Diagnostic settings logs to be send to Log Analytics WOrkspace
-12. Firewall Internet Traffic
-13. Key Vault Purge Protection
-14. Key Vault soft delete
-15. VM NIC IP Forwarding
-16. Enable Network Watchers
-17. NSG for every Subnet
-18. NSG Inbound rules
-19. SQL Database Private endpoint
-20. SQL Database TLS version
-21. SQL server public network access
-22. Storage Account Secure Transfer Settings
-23. Storage Account Key Expiry
-24. Storage Account Network Access
-25. Mandatory Tags
-26. Optional Tags
-27. Internet facing VM NSG
-28. VM managed disk
-29. VM management port
-30. VM encryption
 
 # Run the code
 
-## Authenticate Azure CLI
+## Creating Deploy Pipeline
 
-Hit the command **az login** from Comamnd Prompt or Terminal depending upon your OS. More details can be found [here](https://docs.microsoft.com/en-us/cli/azure/get-started-with-azure-cli)
+Please follow this instruction to create the deploy pipeline
 
-## Trigger Manually
+- Go to **Pipelines** in Azure DevOps
+- Click on **New Pipeline** from right top corner
+- Select **Azure Repos Git**
+- Select your repository containing this code
+- Select **Existing Azure Pipelines YAML file**
+- Select the branch and select path as **/.pipelines/cd.yaml**
+- Click on **Continue**
+- Click on **Save** from **Run** drop down menu on top right corner
+- You may rename the pipeline by choosing **Rename/move** from top right corner Kebab menu
 
-Fire the below command to create the resources using Bicep script
+## Running the Deploy Pipeline
 
-> az deployment sub create --location WestUS --name ExampleDeployment --template-file main.bicep --parameters main.parameters.json
+Please follow the instruction to run deploy pipelines
+
+- Go to **Pipelines** in Azure DevOps and select the [pipeline](#creating-deploy-pipeline) created above.
+
+- Click on **Run Pipeline** from top right corner
+
+- Select appropriate options or select All and then click on **Run** button.
+
+- Follow the Pipeline Status

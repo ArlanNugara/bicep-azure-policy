@@ -1,0 +1,64 @@
+---
+parameters:
+  - name: skipWhatIf
+    type: boolean
+  - name: management_groups
+    type: boolean
+  - name: subscription_placement
+    type: boolean
+  - name: logging_and_sentinel
+    type: boolean
+  - name: policy_assignments
+    type: boolean
+
+stages:
+  - stage: whatif
+    displayName: What If
+    condition: eq(${{ parameters.skipWhatIf }}, false)
+    variables:
+      - name: parametersFileName
+        value: commonParameters.json
+
+    jobs:
+      - job: run_whatif
+        displayName: What If with Bicep
+        steps:
+
+          - template: templates/variables.yaml
+            parameters:
+              parametersFileName: $(parametersFileName)
+          
+          - template: templates/templates.yaml
+            parameters:
+              serviceConnection: '<Your Service Connection Name Here>'
+              whatIfEnabled: true
+              management_groups: ${{ parameters.management_groups }}
+              subscription_placement: ${{ parameters.subscription_placement }}
+              logging_and_sentinel: ${{ parameters.logging_and_sentinel }}
+              policy_assignments: ${{ parameters.policy_assignments }}
+
+  - stage: deploy
+    displayName: Deploy
+    dependsOn: whatif
+    condition: not(or(failed(), canceled()))
+    variables:
+      - name: parametersFileName
+        value: commonParameters.json
+
+    jobs:
+      - job: run_deploy
+        displayName: Deploy with Bicep
+        steps:
+
+          - template: templates/variables.yaml
+            parameters:
+              parametersFileName: $(parametersFileName)
+
+          - template: templates/templates.yaml
+            parameters:
+              serviceConnection: '<Your Service Connection Name Here>'
+              whatIfEnabled: false
+              management_groups: ${{ parameters.management_groups }}
+              subscription_placement: ${{ parameters.subscription_placement }}
+              logging_and_sentinel: ${{ parameters.logging_and_sentinel }}
+              policy_assignments: ${{ parameters.policy_assignments }}

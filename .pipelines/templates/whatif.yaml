@@ -1,0 +1,58 @@
+---
+parameters:
+  - name: serviceConnection
+    type: string
+  - name: whatIfEnabled
+    type: boolean
+    default: true
+  - name: scriptFiles
+    type: object
+
+steps:
+
+  - task: AzurePowerShell@5
+    displayName: Check for First Deployment
+    condition: eq(${{ parameters.whatIfEnabled }}, true)
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnection }}
+      pwsh: true
+      azurePowerShellVersion: LatestVersion
+      ScriptType: "InlineScript"
+      Inline: |
+        $managementGroupId = $env:ROOT_PARENT_MANAGEMENT_GROUP_ID
+        $managementGroups = Get-AzManagementGroup
+        $managementGroup = $managementGroups | Where-Object { $_.Name -eq $managementGroupId }
+
+        $firstDeployment = $true
+
+        if($managementGroup -ne $null) {
+          Write-Host "Found the $managementGroupId Management Group.Starting Deployment"
+        } else {
+          Write-Error "Cannot find the $managementGroupId Management Group.Exiting Deployment"
+          Exit 1
+        }
+
+  - ${{ each scriptFile in parameters.scriptFiles }}:
+    - ${{ if eq( scriptFile.deploymentType, 'mg') }}:
+      - task: AzurePowerShell@5
+        displayName: ${{ scriptFile.displayName }}
+        condition: and(succeeded(), eq(${{ scriptFile.runStep }}, true), eq('${{ scriptFile.deploymentType }}', 'mg'))
+        inputs:
+          azureSubscription: ${{ parameters.serviceConnection }}
+          pwsh: true
+          azurePowerShellVersion: LatestVersion
+          ScriptType: "InlineScript"
+          Inline: |
+            New-AzManagementGroupDeploymentStack -Name ${{ scriptFile.deploymentName }} -ManagementGroupId ${{ scriptFile.managementGroupId }} -Location ${{ scriptFile.location }} -TemplateParameterFile ${{ scriptFile.parameterFile }} -ActionOnUnmanage DeleteAll -DenySettingsMode None -WhatIf
+   
+    - ${{ elseif eq( scriptFile.deploymentType, 'sub') }}:
+      - task: AzurePowerShell@5
+        displayName: ${{ scriptFile.displayName }}
+        condition: and(succeeded(), eq(${{ scriptFile.runStep }}, true), eq('${{ scriptFile.deploymentType }}', 'sub'))
+        inputs:
+          azureSubscription: ${{ parameters.serviceConnection }}
+          pwsh: true
+          azurePowerShellVersion: LatestVersion
+          ScriptType: "InlineScript"
+          Inline: |
+            New-AzSubscriptionDeploymentStack -Name ${{ scriptFile.deploymentName }} -Location ${{ scriptFile.location }} -TemplateParameterFile ${{ scriptFile.parameterFile }} -ActionOnUnmanage DeleteAll -DenySettingsMode None -WhatIf

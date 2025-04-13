@@ -1,0 +1,41 @@
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+parameters:
+  - name: skipWhatIf
+    displayName: Skip What If Check
+    type: boolean
+    default: false
+  - name: management_groups
+    displayName: 'Management Groups Deployment'
+    type: boolean
+    default: false
+  - name: subscription_placement
+    displayName: 'Deploy Subscription Placement'
+    type: boolean
+    default: false
+  - name: logging_and_sentinel
+    displayName: 'Deploy Management Resource'
+    type: boolean
+    default: false
+  - name: policy_assignments
+    displayName: 'Policy Assignments Deployment'
+    type: boolean
+    default: false
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: <Your Azure DevOps Project Name Here>/<Your Azure DevOps Repository Name Here>
+
+extends:
+  template: .pipelines/cd-template.yaml@templates
+  parameters:
+    skipWhatIf: ${{ parameters.skipWhatIf }}
+    management_groups: ${{ parameters.management_groups }}
+    subscription_placement: ${{ parameters.subscription_placement }}
+    logging_and_sentinel: ${{ parameters.logging_and_sentinel }}
+    policy_assignments: ${{ parameters.policy_assignments }}

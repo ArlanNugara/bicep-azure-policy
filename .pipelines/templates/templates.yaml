@@ -1,0 +1,118 @@
+---
+parameters:
+  - name: serviceConnection
+    type: string
+  - name: whatIfEnabled
+    type: boolean
+  - name: management_groups
+    type: boolean
+  - name: subscription_placement
+    type: boolean
+  - name: logging_and_sentinel
+    type: boolean
+  - name: policy_assignments
+    type: boolean
+
+steps:
+
+  - ${{ if eq(parameters.whatIfEnabled, true) }}:
+
+    - template: whatif.yaml
+      parameters:
+        serviceConnection: ${{ parameters.serviceConnection }}
+        whatIfEnabled: ${{ parameters.whatIfEnabled }}
+        scriptFiles:
+          - displayName: "Management Groups Deployment"
+            deploymentType: "mg"
+            managementGroupId: $(ROOT_PARENT_MANAGEMENT_GROUP_ID)
+            parameterFile: config/mg.bicepparam
+            subscriptionId:
+            resourceGroupName:
+            location: "$(LOCATION)"
+            firstRunWhatIf: true
+            runStep: ${{ parameters.management_groups }}
+            deploymentName: "alz-mg-deploy"
+        
+          - displayName: "Deploy Subscription Placement"
+            deploymentType: "mg"
+            managementGroupId: $(ROOT_PARENT_MANAGEMENT_GROUP_ID)
+            parameterFile: config/sub.bicepparam
+            subscriptionId: 
+            resourceGroupName: 
+            location: "$(LOCATION)"
+            firstRunWhatIf: true
+            runStep: ${{ parameters.subscription_placement }}
+            deploymentName: "alz-sub-placement-deploy"
+          
+          - displayName: "Logging and Sentinel Deployment"
+            deploymentType: "sub"
+            parameterFile: config/management.bicepparam
+            managementGroupId: 
+            subscriptionId: $(MANAGEMENT_SUBSCRIPTION_ID)
+            resourceGroupName:
+            location: "$(LOCATION)"
+            firstRunWhatIf: false
+            runStep: ${{ parameters.logging_and_sentinel }}
+            deploymentName: "alz-management-logging-deploy"
+          
+          - displayName: "Policy Assignments Deployment"
+            deploymentType: "mg"
+            managementGroupId: $(ROOT_PARENT_MANAGEMENT_GROUP_ID)
+            parameterFile: config/policy.bicepparam
+            subscriptionId:
+            resourceGroupName:
+            location: "$(LOCATION)"
+            firstRunWhatIf: true
+            runStep: ${{ parameters.policy_assignments }}
+            deploymentName: "alz-policy-deploy"
+  
+  - ${{ if eq(parameters.whatIfEnabled, false) }}:
+
+    - template: deploy.yaml
+      parameters:
+        serviceConnection: ${{ parameters.serviceConnection }}
+        whatIfEnabled: ${{ parameters.whatIfEnabled }}
+        scriptFiles:
+          - displayName: "Management Groups Deployment"
+            deploymentType: "mg"
+            managementGroupId: $(ROOT_PARENT_MANAGEMENT_GROUP_ID)
+            parameterFile: config/mg.bicepparam
+            subscriptionId:
+            resourceGroupName:
+            location: "$(LOCATION)"
+            firstRunWhatIf: false
+            runStep: ${{ parameters.management_groups }}
+            deploymentName: "alz-mg-deploy"
+          
+          - displayName: "Deploy Subscription Placement"
+            deploymentType: "mg"
+            managementGroupId: $(ROOT_PARENT_MANAGEMENT_GROUP_ID)
+            parameterFile: config/sub.bicepparam
+            subscriptionId: 
+            resourceGroupName: 
+            location: "$(LOCATION)"
+            firstRunWhatIf: true
+            runStep: ${{ parameters.subscription_placement }}
+            deploymentName: "alz-sub-placement-deploy"
+          
+          - displayName: "Logging and Sentinel Deployment"
+            deploymentType: "sub"
+            parameterFile: config/management.bicepparam
+            managementGroupId: 
+            subscriptionId: $(MANAGEMENT_SUBSCRIPTION_ID)
+            resourceGroupName:
+            location: "$(LOCATION)"
+            firstRunWhatIf: false
+            runStep: ${{ parameters.logging_and_sentinel }}
+            deploymentName: "alz-management-logging-deploy"
+          
+          - displayName: "Policy Assignments Deployment"
+            deploymentType: "mg"
+            managementGroupId: $(ROOT_PARENT_MANAGEMENT_GROUP_ID)
+            parameterFile: config/policy.bicepparam
+            subscriptionId:
+            resourceGroupName:
+            location: "$(LOCATION)"
+            firstRunWhatIf: true
+            runStep: ${{ parameters.policy_assignments }}
+            deploymentName: "alz-policy-deploy"
